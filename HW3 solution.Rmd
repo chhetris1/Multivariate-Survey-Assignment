@@ -1,0 +1,96 @@
+---
+title: "HW3 MVS"
+author: "Sanjay Chhetri"
+date: "11/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Part A: Logistic Regression
+ 
+For the logistic regression analysis, you will be employing a list-wise deletion approach to handling missing data (which is also what logistic regression does by default). You will be using the following five variables in your analysis: Sex, Marital, Health, Unhappy, and Depression.
+
+```{r loading, include = TRUE}
+library(haven)
+df <- read_sav("GSS2018_HW3A.sav")
+head(df, 10)
+```
+
+### Q.N. 1
+How many participants have complete data on these five variables? What percentage is this of the full sample? 
+
+```{r Q.N. 1}
+nrow(df)
+sum(complete.cases(df))
+df$complete_case <- complete.cases(df)
+
+```
+Out of total 2348 observations in the datafile, 708 are complete cases. It is `r 708/2348*100` percent of the full sample. 
+
+### Q.N. 2
+```{r Q.N. 2}
+test_sex <- chisq.test(table(df$Sex, df$complete_case)) 
+test_sex
+test_marital <- chisq.test(table(df$Marital, df$complete_case))
+test_marital
+test_Health <- chisq.test(table(df$Health, df$complete_case))
+test_Health
+test_unhappy <- chisq.test(table(df$Unhappy, df$Depression))
+test_unhappy
+test_depression <- chisq.test(table(df$Depression, df$complete_case))
+test_depression
+```
+Sex, Marital, Health, and Depression variables each do not seem to predict the distribution of missingness in the dataset. But Unhappy variable seems to predict the distribution of missingness in the dataset. 
+
+### Q.N.3
+```{r complete case subset  }
+dfc <- df %>% filter(complete_case)
+head(dfc, 10)
+nrow(dfc)
+summary(dfc)
+par(mfrow = c(3,2))
+hist(dfc$Sex)
+hist(dfc$Marital)
+hist(dfc$Unhappy)
+hist(dfc$Depression)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
