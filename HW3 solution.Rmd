@@ -32,7 +32,7 @@ df$complete_case <- complete.cases(df)
 Out of total 2348 observations in the datafile, 708 are complete cases. It is `r 708/2348*100` percent of the full sample. 
 
 ### Q.N. 2
-```{r Q.N. 2}
+```{r Chi-Square Tests}
 test_sex <- chisq.test(table(df$Sex, df$complete_case)) 
 test_sex
 test_marital <- chisq.test(table(df$Marital, df$complete_case))
@@ -47,20 +47,26 @@ test_depression
 Sex, Marital, Health, and Depression variables each do not seem to predict the distribution of missingness in the dataset. But Unhappy variable seems to predict the distribution of missingness in the dataset. 
 
 ### Q.N.3
-```{r complete case subset  }
+```{r complete case subset, include=TRUE}
 dfc <- df %>% filter(complete_case)
 head(dfc, 10)
 nrow(dfc)
 summary(dfc)
-par(mfrow = c(3,2))
+par(mfrow = c(2,2))
 hist(dfc$Sex)
 hist(dfc$Marital)
 hist(dfc$Unhappy)
 hist(dfc$Depression)
 ```
 
-
-
+## Q.N. 4
+```{r logistic regression, include = T}
+dfc$Sex <- factor(dfc$Sex)
+dfc$Marital <- factor(dfc$Marital)
+logistic_model <- glm(Depression~Sex+Marital+Health+Unhappy, data = dfc, family = "binomial")
+summary(logistic_model)
+exp(cbind(OR = coef(logistic_model), confint.default(logistic_model)))
+```
 
 
 
