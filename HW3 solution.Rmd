@@ -2,7 +2,9 @@
 title: "HW3 MVS"
 author: "Sanjay Chhetri"
 date: "11/8/2021"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -12,7 +14,7 @@ library(tidyverse)
 
 ## Part A: Logistic Regression
  
-For the logistic regression analysis, you will be employing a list-wise deletion approach to handling missing data (which is also what logistic regression does by default). You will be using the following five variables in your analysis: Sex, Marital, Health, Unhappy, and Depression.
+Instruction: "For the logistic regression analysis, you will be employing a list-wise deletion approach to handling missing data (which is also what logistic regression does by default). You will be using the following five variables in your analysis: Sex, Marital, Health, Unhappy, and Depression".
 
 ```{r loading, include = TRUE}
 library(haven)
@@ -27,6 +29,7 @@ How many participants have complete data on these five variables? What percentag
 nrow(df)
 sum(complete.cases(df))
 df$complete_case <- complete.cases(df)
+708/2348*100
 
 ```
 Out of total 2348 observations in the datafile, 708 are complete cases. It is `r 708/2348*100` percent of the full sample. 
@@ -68,16 +71,44 @@ summary(logistic_model)
 exp(cbind(OR = coef(logistic_model), confint.default(logistic_model)))
 ```
 
+According to the results, sex, health, Martial and unhappy significantly predict odds of depression. 
+Sex was significantly associated with the odds of depression. Specifically, females have 2.93 times the odds of having depression than males (95% CI: [1.89, 4.54])
+Marital status was also significantly predicted the odds of depression. Specifically, unmarried people have 1.6 times the odds of being depressed than married people (95% CI: [1.03, 2.42]
+Health is also significantly associated with the odds of depression. For each unit worsening of health, the odds of getting depression goes up by 1.5 (95% CI: [1.21, 1.81]).
+State of unhappiness also predicts depression. Specifically, each unit decrease in happiness level is associated with 1.71 odds of getting depression(95% CI:[1.21, 2.41 ]
+
+#Part C
 
 
+``` {r interaction check}
+survey <- read_sav("survey.sav")
+head(survey)
+int <- aov(Mslfest~age_group*Mlifesat, data = survey)
+summary(int)
 
+```
 
+The interaction terms is significant. 
 
+```{r titanic}
+titanic <- read_csv("titanic.csv")
+head(titanic)
+table(titanic$Survived)
+titanic %>% ggplot(aes(Survived))+ geom_bar()
+```
+Out of total 887 people, 545 people died and only 342 survived. 
 
+``` {r glm on titanic}
+survival <- glm(Survived~factor(Pclass)+factor(Sex)+Age, data = titanic)
+summary(survival)
+exp(cbind(OR = coef(survival), confint.default(survival)))
 
+```
 
-
-
+All predictors in the model had individual main effects on survival status. 
+Passenger class (Pclass) significantly predicted survival. Specifically, compared to the first class passengers, the second class passengers had about 20% less odds of survival and the third class passengers had about 32% less odds of survival (all else being equal). 
+Sex also predicted survival. Specifically, males had 40% less odds of survival than females. 
+Age also predicted survival. Each year increase of age predicted 1% decrease in survival odds. 
 
 
 
