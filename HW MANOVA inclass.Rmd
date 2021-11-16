@@ -1,0 +1,86 @@
+---
+title: "Manova in-class Assignment"
+author: "Sanjay Chhetri"
+date: "11/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## QN1
+Based on the relationship between the two DVs, would a MANOVA appear to be appropriate? Why or why not?
+
+```{r testing how DVs relate}
+survey <- read_csv("survey.csv")
+head(survey)
+cor.test(survey$Mnegaff, survey$Mpstress)
+```
+Since the DV's are significantly and rather strongly correlated, combining the two DV's to do a MANOVA makes sense. 
+## QN2
+	Did the data meet the assumption of homogeneity of variance (e.g., Levene’s test) for the two DVs? Why or why not?
+
+``` {r Levene Test}
+library(car)
+survey$age_group <- factor(survey$age_group)
+leveneTest(survey$Mnegaff~ survey$age_group)
+leveneTest(survey$Mpstress~ survey$age_group)
+```
+Since Levene's tests on both DV's returned not significant, we can be confident that homogeniety of variance is upheld.
+
+``` {r visualizing}
+survey %>% ggplot(aes(x = age_group, y = Mpstress)) +
+  geom_boxplot()+
+  geom_point()
+survey %>% ggplot(aes(x = age_group, y = Mnegaff)) +
+  geom_boxplot()+
+  geom_point()
+```
+##Q3 
+Did the data meet the assumption of homogeneity of covariance (e.g., Box’s M)? Why or why not?
+``` {r covariance test}
+library(heplots)
+boxM(Y=survey[, c("Mpstress", "Mnegaff")], group = survey$age_group)
+```
+The As p-value>0.0 for Box's M test, we can be confident that there is no significant differences in variance-covarance matrices for each combination of DV-IV groups. 
+
+##Q4
+Perform the MANOVA with the above IV and DVs. 
+``` {r MANOVA}
+combo_dv <- cbind(survey$Mpstress, survey$Mnegaff)
+manova <- manova(combo_dv~age_group, data = survey)
+summary(manova)
+```
+The One Way MANOVA sought to saw how age_group explained the variances in both stress and negative affect variables. Statistically significant results, F(2,430) = 2.64, p = 0.03 indicate provides evidence that age group matters in both stress and negative affect.
+
+### Q.N.5
+What was the effect size of the multivariate effect of age group? How would you interpret that effect size (e.g., small, medium, large)?
+```{r effect size}
+library(effectsize)
+effectsize::eta_squared(manova)
+```
+Eta Squared value of 0.01 obtained here is considered a small effect size. [medium =0.06, large =0.14]
+
+## QN6
+If the multivariate test was statistically significant, report the univariate ANOVA results. That is, what was the effect of age group on the two DVs separately?
+``` {r ANOVAs}
+summary(aov(Mpstress~age_group, data = survey))
+summary(aov(Mnegaff~age_group, data = survey))
+```
+The two separate ANOVA's with each DV vs age_group also yields statistically significant results, as expected. 
+
+##QN 7
+If the univariate effects were statistically significant, perform post-hoc tests that compare the three age groups to one another on each of the two DVs. Make sure you include an appropriate statistical control for performing multiple tests. Report the conclusions of the post-hoc analyses below.
+
+```{r post-hoc}
+#Have a look at the mean DV values for each level of age-group
+tapply(survey$Mpstress, survey$age_group, mean, na.rm =T)
+tapply(survey$Mnegaff, survey$age_group, mean, na.rm =T)
+pairwise.t.test(survey$Mpstress, survey$age_group, p.adjust.method = "bonf")
+pairwise.t.test(survey$Mnegaff, survey$age_group, p.adj = "bonf", data = survey)
+```
+For each of the two  DVs, age groups that significantly differ are '0' (young adults) and '2' (older adults). Bonferroni correction was applied to make up for multiple analyses run.
+
+
